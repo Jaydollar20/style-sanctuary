@@ -3,7 +3,7 @@ import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route, useLocation } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { useEffect } from "react";
 import { AnimatePresence, motion } from "framer-motion";
 import Header from "./components/Header";
 import Footer from "./components/Footer";
@@ -15,47 +15,9 @@ import Orders from "./pages/Orders";
 import News from "./pages/News";
 import ProfilePage from "./pages/ProfilePage";
 import NotFound from "./pages/NotFound";
+import { useAuth } from "./hooks/useAuth";
 
 const queryClient = new QueryClient();
-
-interface User {
-  email: string;
-  created_at?: string;
-}
-
-// Temporary mock auth (will be replaced with Supabase)
-const useMockAuth = () => {
-  const [user, setUser] = useState<User | null>(() => {
-    const saved = localStorage.getItem('mock_user');
-    return saved ? JSON.parse(saved) : null;
-  });
-
-  const login = async (email: string, password: string) => {
-    // Mock login - will be replaced with Supabase
-    if (password.length >= 6) {
-      const mockUser = { email, created_at: new Date().toISOString() };
-      setUser(mockUser);
-      localStorage.setItem('mock_user', JSON.stringify(mockUser));
-      return {};
-    }
-    return { error: { message: "Invalid credentials" } };
-  };
-
-  const signup = async (email: string, password: string) => {
-    // Mock signup - will be replaced with Supabase
-    if (password.length >= 6) {
-      return {};
-    }
-    return { error: { message: "Password must be at least 6 characters" } };
-  };
-
-  const logout = () => {
-    setUser(null);
-    localStorage.removeItem('mock_user');
-  };
-
-  return { user, login, signup, logout };
-};
 
 // Page transition wrapper
 const PageTransition = ({ children }: { children: React.ReactNode }) => {
@@ -78,13 +40,21 @@ const PageTransition = ({ children }: { children: React.ReactNode }) => {
 
 // Main app layout
 const AppLayout = () => {
-  const { user, login, signup, logout } = useMockAuth();
+  const { user, loading, login, signup, logout } = useAuth();
   const location = useLocation();
 
   // Scroll to top on route change
   useEffect(() => {
     window.scrollTo(0, 0);
   }, [location.pathname]);
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center min-h-screen">
+        <div className="animate-pulse text-muted-foreground">Loading...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="flex flex-col min-h-screen">
