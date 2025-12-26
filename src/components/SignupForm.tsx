@@ -60,7 +60,7 @@ const SignupForm = ({ onSignup }: SignupFormProps) => {
     } else {
       toast({
         title: "Account created",
-        description: "Please check your email to confirm your account.",
+        description: "Your account has been created successfully. You can now sign in.",
       });
       navigate("/login");
     }
